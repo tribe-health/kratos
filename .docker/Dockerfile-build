@@ -30,8 +30,8 @@ RUN addgroup -S ory; \
     chown -R ory:ory /home/ory
 
 COPY --from=builder /usr/bin/kratos /usr/bin/kratos
-COPY --from=builder /go/src/github.com/ory/kratos/cordico/identity.schema.json /home/ory/identity.schema.json
-COPY --from=builder /go/src/github.com/ory/kratos/cordico/organization.schema.json /home/ory/organization.schema.json
+COPY --from=builder /go/src/github.com/ory/kratos/cordico/identity.schema.json /etc/config/identity.schema.json
+COPY --from=builder /go/src/github.com/ory/kratos/cordico/organization.schema.json /etc/config/organization.schema.json
 COPY --from=builder /go/src/github.com/ory/kratos/cordico/kratos.yml /home/ory/kratos.yml
 
 # By creating the sqlite folder as the ory user, the mounted volume will be owned by ory:ory, which
