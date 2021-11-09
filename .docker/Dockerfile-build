@@ -30,9 +30,7 @@ RUN addgroup -S ory; \
     chown -R ory:ory /home/ory
 
 COPY --from=builder /usr/bin/kratos /usr/bin/kratos
-COPY --from=builder /go/src/github.com/ory/kratos/cordico/identity.schema.json /etc/config/identity.schema.json
-COPY --from=builder /go/src/github.com/ory/kratos/cordico/organization.schema.json /etc/config/organization.schema.json
-COPY --from=builder /go/src/github.com/ory/kratos/cordico/kratos.yml /home/ory/kratos.yml
+COPY --from=builder /go/src/github.com/ory/kratos/cordico/kratos.yml /etc/config/kratos.yml
 
 # By creating the sqlite folder as the ory user, the mounted volume will be owned by ory:ory, which
 # is required for read/write of SQLite.
@@ -44,10 +42,12 @@ VOLUME /var/lib/sqlite
 # exists, it will be automatically used as the configuration file).
 VOLUME /home/ory
 
+ENV DSN postgres://kratos:kratos@cordico-user-db.postgres.database.azure.com:5432/kratos
+
 # Declare the standard ports used by Kratos (4433 for public service endpoint, 4434 for admin service endpoint)
 EXPOSE 4433 4434
 
 USER 10000
 
 ENTRYPOINT ["kratos"]
-CMD ["serve"]
+CMD ["serve", "-c", "/etc/config/kratos.yml"]
