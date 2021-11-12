@@ -50,4 +50,4 @@ EXPOSE 4433 4434
 USER 10000
 
 ENTRYPOINT ["kratos"]
-CMD ["serve", "-c", "/etc/config/kratos.yml"]
+CMD ["serve", "-c", "/etc/config/kratos.yml", "--dev"]
