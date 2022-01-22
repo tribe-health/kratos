@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kratos
+  namespace: default
+  labels:
+    app: kratos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kratos
+  template:
+    metadata:
+      labels:
+        app: kratos
+    spec:
+      initContainers:
+        - name: kratos-migrate
+          image: docker.io/gqadonis/kratos:latest
+          env:
+            - name: DSN
+              value: postgres://kratos:kratos@postgres.default.svc.cluster.local/kratos
+          command:
+            - kratos
+            - migrate
+            - sql
+            - --config
+            - /etc/config/kratos.yml
+            - -e
+            - --yes
+          volumeMounts:
+            - mountPath: /etc/config
+              name: config
+      containers:
+        - name: kratos
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: 250m
+              memory: 512Mi
+          image: docker.io/gqadonis/kratos:latest
+          env:
+            - name: DSN
+              value: postgres://kratos:kratos@postgres.default.svc.cluster.local/kratos
+            - name: SERVE_PUBLIC_BASE_URL
+              value: https://kratos-ss.tribe.here/
+          command:
+            - kratos
+            - serve
+            - -c
+            - /etc/config/kratos.yml
+          ports:
+            - containerPort: 4433
+              name: api
+            - containerPort: 4434
+              name: admin
+          volumeMounts:
+            - name: config
+              mountPath: /etc/config
+      volumes:
+        - name: config
+          configMap:
+            name: kratos-config

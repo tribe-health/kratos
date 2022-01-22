@@ -7,6 +7,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gobuffalo/pop/v6"
+
+	"github.com/ory/nosurf"
+
 	"github.com/ory/kratos/selfservice/strategy/webauthn"
 
 	"github.com/ory/kratos/selfservice/strategy/lookup"
@@ -19,8 +23,6 @@ import (
 	"github.com/ory/kratos/corp"
 
 	prometheus "github.com/ory/x/prometheusx"
-
-	"github.com/gobuffalo/pop/v5"
 
 	"github.com/ory/kratos/cipher"
 	"github.com/ory/kratos/continuity"
@@ -70,7 +72,7 @@ type RegistryDefault struct {
 
 	injectedSelfserviceHooks map[string]func(config.SelfServiceHook) interface{}
 
-	nosurf         x.CSRFHandler
+	nosurf         nosurf.Handler
 	trc            *tracing.Tracer
 	pmm            *prometheus.MetricsManager
 	writer         herodot.Writer
@@ -239,11 +241,11 @@ func (m *RegistryDefault) MetricsHandler() *prometheus.Handler {
 	return m.metricsHandler
 }
 
-func (m *RegistryDefault) WithCSRFHandler(c x.CSRFHandler) {
+func (m *RegistryDefault) WithCSRFHandler(c nosurf.Handler) {
 	m.nosurf = c
 }
 
-func (m *RegistryDefault) CSRFHandler() x.CSRFHandler {
+func (m *RegistryDefault) CSRFHandler() nosurf.Handler {
 	if m.nosurf == nil {
 		panic("csrf handler is not set")
 	}
@@ -255,6 +257,14 @@ func (m *RegistryDefault) Config(ctx context.Context) *config.Config {
 		panic("configuration not set")
 	}
 	return corp.ContextualizeConfig(ctx, m.c)
+}
+
+func (m *RegistryDefault) CourierConfig(ctx context.Context) courier.SMTPConfig {
+	return m.Config(ctx)
+}
+
+func (m *RegistryDefault) SMTPConfig(ctx context.Context) courier.SMTPConfig {
+	return m.Config(ctx)
 }
 
 func (m *RegistryDefault) selfServiceStrategies() []interface{} {
@@ -413,7 +423,7 @@ func (m *RegistryDefault) SelfServiceErrorHandler() *errorx.Handler {
 	return m.errorHandler
 }
 
-func (m *RegistryDefault) CookieManager(ctx context.Context) sessions.Store {
+func (m *RegistryDefault) CookieManager(ctx context.Context) sessions.StoreExact {
 	cs := sessions.NewCookieStore(m.Config(ctx).SecretsSession()...)
 	cs.Options.Secure = !m.Config(ctx).IsInsecureDevMode()
 	cs.Options.HttpOnly = true
@@ -437,7 +447,7 @@ func (m *RegistryDefault) CookieManager(ctx context.Context) sessions.Store {
 	return cs
 }
 
-func (m *RegistryDefault) ContinuityCookieManager(ctx context.Context) sessions.Store {
+func (m *RegistryDefault) ContinuityCookieManager(ctx context.Context) sessions.StoreExact {
 	// To support hot reloading, this can not be instantiated only once.
 	cs := sessions.NewCookieStore(m.Config(ctx).SecretsSession()...)
 	cs.Options.Secure = !m.Config(ctx).IsInsecureDevMode()
@@ -577,7 +587,7 @@ func (m *RegistryDefault) SetPersister(p persistence.Persister) {
 }
 
 func (m *RegistryDefault) Courier(ctx context.Context) *courier.Courier {
-	return courier.NewSMTP(m, m.Config(ctx))
+	return courier.NewSMTP(ctx, m)
 }
 
 func (m *RegistryDefault) ContinuityManager() continuity.Manager {

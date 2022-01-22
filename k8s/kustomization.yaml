@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: default
+resources:
+  - kratos-deployment.yaml
+configMapGenerator:
+  - files:
+      - ./identity.schema.json
+      - ./organization.schema.json
+      - ./kratos.yml
+    name: kratos-config
+    envs:
+      - .env

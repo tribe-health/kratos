@@ -1,0 +1,77 @@
+version: v0.8.0-alpha.3
+
+dsn: postgres://kratos:kratos@postgres.default.svc.cluster.local/kratos
+
+serve:
+  public:
+    base_url: https://kratos-ss.tribe.here/
+    cors:
+      enabled: true
+  admin:
+    base_url: http://kratos.default.svc.cluster.local:4434/
+
+selfservice:
+  default_browser_return_url: https://kratos-ss.tribe.here/ui/welcome
+  whitelisted_return_urls:
+    - https://kratos-ss.tribe.here
+
+  methods:
+    password:
+      enabled: true
+
+  flows:
+    error:
+      ui_url: https://kratos-ss.tribe.here/error
+
+    settings:
+      ui_url: https://kratos-ss.tribe.here/settings
+      privileged_session_max_age: 15m
+
+    recovery:
+      enabled: true
+      ui_url: https://kratos-ss.tribe.here/recovery
+
+    verification:
+      enabled: true
+      ui_url: https://kratos-ss.tribe.here/verify
+      after:
+        default_browser_return_url: https://kratos-ss.tribe.here/dashboard
+
+    logout:
+      after:
+        default_browser_return_url: https://kratos-ss.tribe.here/auth/login
+
+    login:
+      ui_url: https://kratos-ss.tribe.here/auth/login
+
+    registration:
+      ui_url: https://kratos-ss.tribe.here/auth/registration
+      after:
+        password:
+          hooks:
+            -
+              hook: session
+
+log:
+  level: debug
+  format: text
+  leak_sensitive_values: true
+
+secrets:
+  cookie:
+    - Bjcm87kiruJlmrMdLmWyHRh56PbNzeRg
+
+hashers:
+  argon2:
+    parallelism: 1
+    memory: 128MB
+    iterations: 2
+    salt_length: 16
+    key_length: 16
+
+identity:
+  default_schema_url: file:///etc/config/identity.schema.json
+
+courier:
+  smtp:
+    connection_uri: smtps://test:test@mailslurper:1025/?skip_ssl_verify=true

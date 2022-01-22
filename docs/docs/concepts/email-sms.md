@@ -3,8 +3,8 @@ id: email-sms
 title: Out-of-band communication via E-Mail and SMS
 ---
 
-Ory Kratos sends out-of-band messages via SMS or E-Mail. These messages are
-required for The following exemplary use cases require these messages:
+Ory Kratos sends out-of-band messages via SMS or E-Mail. The following exemplary
+use cases require these messages:
 
 - Send an account activation email
 - Verify an E-Mail address or mobile phone number using SMS
@@ -102,7 +102,10 @@ indicate where your custom templates are located. This will become the
 `email.subject.gotmpl`, `email.body.gotmpl` and `email.body.plaintext.gotmpl`
 are common template file names expected in the sub directories of the root
 directory, corresponding to the respective methods for filling e-mail subject
-and body.
+and body. Both plain text and HTML templates are required. The courier uses them
+as
+[alternatives](https://github.com/ory/kratos/blob/871ee0475a27771dd6395aad617f41a22ccc3b9a/courier/courier.go#L205)
+for fallback.
 
 > Templates use the golang template engine in the `text/template` package for
 > rendering the `email.subject.gotmpl` and `email.body.plaintext.gotmpl`
@@ -143,6 +146,9 @@ Hi, please verify your account by clicking the following link:
 ```gotmp title="courier/template/templates/verification/valid/email.body.plaintext.gotmpl"
 Hi, please verify your account by clicking the following link: {{ .VerificationURL }}
 ```
+
+If you're running multiple instances of Kratos and separate courier job, make
+sure to provide templates to all instances (both Kratos and courier).
 
 ### The Identity attribute
 

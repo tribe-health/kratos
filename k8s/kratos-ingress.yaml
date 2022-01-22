@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  name: kratos
+  namespace: default
+spec:
+  ingressClassName: "nginx"
+  rules:
+    - host: "kratos.tribe.here"
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: kratos
+                port:
+                  number: 4433
+    - host: "kratos-admin.tribe.here"
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: kratos
+                port:
+                  number: 4434
+  tls:
+    - secretName: local-tls-secret
+      hosts:
+        - "kratos.tribe.here"
+        - "kratos-admin.tribe.here"
