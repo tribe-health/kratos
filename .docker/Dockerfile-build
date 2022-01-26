@@ -24,12 +24,19 @@ RUN go build -o /usr/bin/kratos main.go
 
 FROM alpine:3.15.0
 
+RUN apk add -U --no-cache ca-certificates
+RUN apk --no-cache add curl
+
+COPY --from=base /go/src/github.com/ory/kratos/cordico/certs/star_dev_cordico_com.crt /usr/local/share/ca-certificates
+RUN cat /usr/local/share/ca-certificates/star_dev_cordico_com.crt >> /etc/ssl/certs/ca-certificates.crt
+
 RUN addgroup -S ory; \
     adduser -S ory -G ory -D -u 10000 -h /home/ory -s /bin/nologin; \
     chown -R ory:ory /home/ory
 
 COPY --from=base /usr/bin/kratos /usr/bin/kratos
 COPY --from=base /go/src/github.com/ory/kratos/cordico/kratos.yml /etc/config/kratos.yml
+COPY --from=base /go/src/github.com/ory/kratos/.schema /.schema
 
 # Exposing the ory home directory to simplify passing in Kratos configuration (e.g. if the file $HOME/.kratos.yaml
 # exists, it will be automatically used as the configuration file).
