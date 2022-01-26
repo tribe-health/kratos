@@ -3,6 +3,8 @@ kind: Kustomization
 namespace: default
 resources:
   - kratos-deployment.yaml
+  - kratos-service.yaml
+  - kratos-ingress.yaml
 configMapGenerator:
   - files:
       - ./identity.schema.json
@@ -11,3 +13,10 @@ configMapGenerator:
     name: kratos-config
     envs:
       - .env
+secretGenerator:
+  - name: tribe-here-tls
+    namespace: default
+    type: "kubernetes.io/tls"
+    files:
+      - tls.crt
+      - tls.key

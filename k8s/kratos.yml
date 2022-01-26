@@ -11,7 +11,7 @@ serve:
     base_url: http://kratos.default.svc.cluster.local:4434/
 
 selfservice:
-  default_browser_return_url: https://kratos-ss.tribe.here/ui/welcome
+  default_browser_return_url: https://kratos-ss.tribe.here/dashboard
   whitelisted_return_urls:
     - https://kratos-ss.tribe.here
 
@@ -24,7 +24,7 @@ selfservice:
       ui_url: https://kratos-ss.tribe.here/error
 
     settings:
-      ui_url: https://kratos-ss.tribe.here/settings
+      ui_url: https://kratos-ss-tribe.here/settings
       privileged_session_max_age: 15m
 
     recovery:

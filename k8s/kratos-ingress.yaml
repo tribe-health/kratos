@@ -29,7 +29,7 @@ spec:
                 port:
                   number: 4434
   tls:
-    - secretName: local-tls-secret
+    - secretName: tribe-here-tls
       hosts:
         - "kratos.tribe.here"
         - "kratos-admin.tribe.here"
